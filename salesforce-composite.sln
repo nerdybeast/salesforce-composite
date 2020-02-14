@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "salesforce-composite", "salesforce-composite\salesforce-composite.csproj", "{2EC34C37-9519-4C0F-B834-0A37CE569ACB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Salesforce.Composite.Tests", "Salesforce.Composite.Tests\Salesforce.Composite.Tests.csproj", "{A3B8A40A-CF93-43D3-A6AD-6F6ECBAF7B85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2EC34C37-9519-4C0F-B834-0A37CE569ACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EC34C37-9519-4C0F-B834-0A37CE569ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EC34C37-9519-4C0F-B834-0A37CE569ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EC34C37-9519-4C0F-B834-0A37CE569ACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3B8A40A-CF93-43D3-A6AD-6F6ECBAF7B85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3B8A40A-CF93-43D3-A6AD-6F6ECBAF7B85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3B8A40A-CF93-43D3-A6AD-6F6ECBAF7B85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3B8A40A-CF93-43D3-A6AD-6F6ECBAF7B85}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {22A86DF4-A6A2-4C6A-8FC3-110E6D0F1009}
+	EndGlobalSection
+EndGlobal
