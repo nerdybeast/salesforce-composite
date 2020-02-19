@@ -356,3 +356,6 @@ MigrationBackup/
 # Everything above this line was taken from:
 # https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 ##########################################################################
+
+# Visual Studio Code settings - these are per user
+.vscode
