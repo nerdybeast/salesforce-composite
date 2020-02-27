@@ -25,10 +25,13 @@ namespace salesforce_composite
             return this;
         }
 
-        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out T sobjectReference) where T : Sobject, new()
+        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject, new()
         {
             _requests.Add(new CreateSobject<T>(referenceId, typeof(T).Name, sobject));
-            sobjectReference = new T().PrependValueToStringProperties(referenceId);
+
+            //sobjectReference = new T().PrependValueToStringProperties(referenceId);
+            sobjectIdReference = $"@{{{referenceId}.id}}";
+
             return this;
         }
 
@@ -51,6 +54,16 @@ namespace salesforce_composite
             };
 
             var x = JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+
+            //Temp
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("")
+            };
+
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "00D230000000...");
+            HttpResponseMessage response = httpClient.PostAsJsonAsync("/services/data/v38.0/composite/", x).GetAwaiter().GetResult();
+            var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
             return new List<CompositeSubrequestResult>();
         }

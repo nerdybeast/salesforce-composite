@@ -4,7 +4,7 @@ using salesforce_composite;
 
 namespace Salesforce.Composite.Tests
 {
-    public class Tests
+    public class CompositeBuilderTests
     {
         [SetUp]
         public void Setup()
@@ -15,7 +15,7 @@ namespace Salesforce.Composite.Tests
         public void Test1()
         {
             var test = new TestDummy().PrependValueToStringProperties("TestPrepend");
-            Assert.AreEqual("TestPrepend.Test1", test.Test1);
+            Assert.AreEqual("@{TestPrepend.Test1}", test.Test1);
 
             //new CompositeBuilder()
         }
@@ -25,28 +25,50 @@ namespace Salesforce.Composite.Tests
         {
             var builder = new CompositeBuilder()
 
+                //.CreateSobject("NewAccount", new Account
+                //{
+                //    Name = "ACME",
+                //    EmployeeCount = 100
+                //}, out Account accountRef)
+
+                //.CreateSobject("NewContact", new Contact
+                //{
+                //    AccountId = accountRef.Id,
+                //    FirstName = "Bugs",
+                //    LastName = "Bunny"
+                //}, out Contact contactRef)
+
+                //.RetrieveSobject<Contact>("NewContactInfo", contactRef.Id)
+
+                //.UpdateSobject("UpdateAccount", new Account
+                //{
+                //    Id = accountRef.Id
+                //})
+
+                //.RetrieveSobject<Account>("NewAccountInfo", accountRef.Id, out Account newAccount);
+
                 .CreateSobject("NewAccount", new Account
                 {
                     Name = "ACME",
                     EmployeeCount = 100
-                }, out Account accountRef)
+                }, out string accountId)
 
                 .CreateSobject("NewContact", new Contact
                 {
-                    AccountId = accountRef.Id,
+                    AccountId = accountId,
                     FirstName = "Bugs",
                     LastName = "Bunny"
-                }, out Contact contactRef)
+                }, out string contactId)
 
-                .RetrieveSobject("NewContactInfo", contactRef.Id, out Contact contactInfoRef)
+                .RetrieveSobject<Contact>("NewContactInfo", contactId)
 
                 .UpdateSobject("UpdateAccount", new Account
                 {
-                    Id = accountRef.Id,
-                    //PersonContactId = contactInfoRef.Id
+                    Id = accountId,
+                    EmployeeCount = 10
                 })
 
-                .RetrieveSobject<Account>("NewAccountInfo", accountRef.Id, out Account newAccount);
+                .RetrieveSobject<Account>("NewAccountInfo", accountId, out Account newAccount);
 
             var result = builder.Execute();
         }

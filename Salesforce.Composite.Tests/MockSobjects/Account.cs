@@ -12,7 +12,7 @@ namespace Salesforce.Composite.Tests.MockSobjects
 
         public string Description { get; set; }
 
-        [SalesforceName("NumberOfEmployees")]
+        [SalesforceName("Total_Employees__c")]
         public int EmployeeCount { get; set; }
 
         [SalesforceIgnore]
