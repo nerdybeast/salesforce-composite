@@ -26,17 +26,17 @@ namespace salesforce_composite
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SalesforceAccessToken);
         }
 
-        public async Task<List<CompositeSubrequestResult>> SendAsync(List<CompositeSubrequestBase> compositeRequests, bool allOrNone = true)
-        {
-            var payload = new CompositeRequestBody
-            {
-                AllOrNone = allOrNone,
-                CompositeRequest = compositeRequests
-            };
+        // public async Task<List<CompositeSubrequestResult>> SendAsync(List<CompositeSubrequestBase> compositeRequests, bool allOrNone = true)
+        // {
+        //     var payload = new CompositeRequestBody
+        //     {
+        //         AllOrNone = allOrNone,
+        //         CompositeRequest = compositeRequests
+        //     };
 
-            HttpResponseMessage response = await _client.PostAsJsonAsync("/", payload);
-            CompositeResponseBody compositeResponseBody = await response.Content.ReadAsAsync<CompositeResponseBody>();
-            return compositeResponseBody.CompositeResponse;
-        }
+        //     HttpResponseMessage response = await _client.PostAsJsonAsync("/", payload);
+        //     CompositeResponseBody compositeResponseBody = await response.Content.ReadAsAsync<CompositeResponseBody>();
+        //     return compositeResponseBody.CompositeResponse;
+        // }
     }
 }

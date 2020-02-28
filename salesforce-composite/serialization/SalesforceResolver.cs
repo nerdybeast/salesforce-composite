@@ -12,6 +12,11 @@ namespace salesforce_composite.serialization
     public class SalesforceResolver : DefaultContractResolver
     {
         private MemberInfo _memberInfo;
+        private SalesforceSerialization _salesforceSerialization;
+
+        public SalesforceResolver(SalesforceSerialization salesforceSerialization) {
+            _salesforceSerialization = salesforceSerialization;
+        }
 
         protected override IValueProvider CreateMemberValueProvider(MemberInfo memberInfo)
         {
@@ -63,7 +68,7 @@ namespace salesforce_composite.serialization
 
             if(attr is SalesforceSerializationAttribute)
             {
-
+                
             }
 
             return false;

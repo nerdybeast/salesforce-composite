@@ -20,6 +20,7 @@ namespace salesforce_composite
         public bool AllOrNone { get; set; } = true;
 
         [JsonProperty("compositeRequest")]
-        public List<CompositeSubrequestBase> CompositeRequest { get; set; } = new List<CompositeSubrequestBase>();
+        //public List<CompositeSubrequestBase> CompositeRequest { get; set; } = new List<CompositeSubrequestBase>();
+        public List<string> CompositeRequest { get; set; } = new List<string>();
     }
 }
