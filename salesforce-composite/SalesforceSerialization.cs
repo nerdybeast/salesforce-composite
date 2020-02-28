@@ -4,7 +4,9 @@ namespace salesforce_composite
 	{
 		CREATE,
 		RETRIEVE,
-		UPDATE
+        PATCH,
+		UPDATE,
+        DELETE
 	}
 	
 }

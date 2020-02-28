@@ -9,14 +9,21 @@ using System.Linq;
 
 namespace salesforce_composite
 {
+    /// <summary>
+    /// https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm
+    /// </summary>
     public class CompositeBuilder
     {
-        //private List<CompositeSubrequestBase> _requests { get; set; } = new List<CompositeSubrequestBase>();
-        private List<Subrequest> _requests = new List<Subrequest>();
+        private readonly List<Subrequest> _requests = new List<Subrequest>();
+        private readonly bool _allOrNone;
+
+        public CompositeBuilder(bool allOrNone = true)
+        {
+            _allOrNone = allOrNone;
+        }
 
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId) where T : Sobject
         {
-            //_requests.Add(new RetrieveSobject(referenceId, typeof(T).Name, sobjectId));
             var action = new RetrieveSobject(referenceId, typeof(T).Name, sobjectId);
             _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
 
@@ -25,7 +32,6 @@ namespace salesforce_composite
 
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId, out T sobjectReference) where T : Sobject, new()
         {
-            //_requests.Add(new RetrieveSobject(referenceId, typeof(T).Name, sobjectId));
             var action = new RetrieveSobject(referenceId, typeof(T).Name, sobjectId);
             _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
             
@@ -36,11 +42,9 @@ namespace salesforce_composite
 
         public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject, new()
         {
-            //_requests.Add(new CreateSobject<T>(referenceId, typeof(T).Name, sobject));
             var action = new CreateSobject<T>(referenceId, typeof(T).Name, sobject);
             _requests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
 
-            //sobjectReference = new T().PrependValueToStringProperties(referenceId);
             sobjectIdReference = $"@{{{referenceId}.id}}";
 
             return this;
@@ -53,13 +57,36 @@ namespace salesforce_composite
             return this;
         }
 
+        public CompositeBuilder PatchSobject<T>(string referenceId, T sobject) where T : Sobject, new()
+        {
+            var action = new UpdateSobject<T>(referenceId, typeof(T).Name, sobject);
+            _requests.Add(new Subrequest(SalesforceSerialization.PATCH, action));
+            return this;
+        }
+
+        public CompositeBuilder DeleteSobject<T>(string referenceId, string sobjectId) where T : Sobject
+        {
+            var action = new DeleteSobject(referenceId, typeof(T).Name, sobjectId);
+            _requests.Add(new Subrequest(SalesforceSerialization.DELETE, action));
+
+            return this;
+        }
+
         public List<CompositeSubrequestResult> Execute()
         {
             var json = _requests.Select(req => 
             {
+                var nullValueHandling = NullValueHandling.Ignore;
+
+                if(req.salesforceSerialization == SalesforceSerialization.UPDATE)
+                {
+                    nullValueHandling = NullValueHandling.Include;
+                }
+
                 var settings = new JsonSerializerSettings
                 {
-                    ContractResolver = new SalesforceResolver(req.salesforceSerialization)
+                    ContractResolver = new SalesforceResolver(req.salesforceSerialization),
+                    NullValueHandling = nullValueHandling
                 };
 
                 var x = JsonConvert.SerializeObject(req.compositeSubrequestBase, Formatting.Indented, settings);
@@ -67,27 +94,17 @@ namespace salesforce_composite
                 return x;
             });
 
-            // var settings = new JsonSerializerSettings
-            // {
-            //     ContractResolver = new SalesforceResolver()
-            // };
+            var body = $"{{ \"allOrNone\": {_allOrNone.ToString().ToLower()}, \"compositeRequest\": [{string.Join(",", json)}] }}";
 
-            // var x = JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+            ////Temp
+            //var httpClient = new HttpClient
+            //{
+            //    BaseAddress = new Uri("")
+            //};
 
-            var obj = new CompositeRequestBody
-            {
-                CompositeRequest = json.ToList()
-            };
-
-            //Temp
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("")
-            };
-
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "00D230000000...");
-            HttpResponseMessage response = httpClient.PostAsJsonAsync("/services/data/v38.0/composite/", obj).GetAwaiter().GetResult();
-            var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            //httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "00D230000000...");
+            //HttpResponseMessage response = httpClient.PostAsJsonAsync("/services/data/v38.0/composite/", body).GetAwaiter().GetResult();
+            //var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
             return new List<CompositeSubrequestResult>();
         }
@@ -125,19 +142,13 @@ namespace salesforce_composite
         }
     }
 
-    public class PatchSobject
-    {
-        public PatchSobject(string referenceId, string sobjectType, string sobjectId, object sobject)
-        {
-
-        }
-    }
-
-    public class DeleteSobject
+    public class DeleteSobject : CompositeSobjectSubrequest<Sobject>
     {
         public DeleteSobject(string referenceId, string sobjectType, string sobjectId)
         {
-
+            base.ReferenceId = referenceId;
+            HttpMethod = CompositeHttpMethod.DELETE.ToString();
+            Url = $"/services/data/v38.0/sobjects/{sobjectType}/{sobjectId}";
         }
     }
 }

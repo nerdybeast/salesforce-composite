@@ -23,29 +23,7 @@ namespace Salesforce.Composite.Tests
         [Test]
         public void fdfdf()
         {
-            var builder = new CompositeBuilder()
-
-                //.CreateSobject("NewAccount", new Account
-                //{
-                //    Name = "ACME",
-                //    EmployeeCount = 100
-                //}, out Account accountRef)
-
-                //.CreateSobject("NewContact", new Contact
-                //{
-                //    AccountId = accountRef.Id,
-                //    FirstName = "Bugs",
-                //    LastName = "Bunny"
-                //}, out Contact contactRef)
-
-                //.RetrieveSobject<Contact>("NewContactInfo", contactRef.Id)
-
-                //.UpdateSobject("UpdateAccount", new Account
-                //{
-                //    Id = accountRef.Id
-                //})
-
-                //.RetrieveSobject<Account>("NewAccountInfo", accountRef.Id, out Account newAccount);
+            new CompositeBuilder()
 
                 .CreateSobject("NewAccount", new Account
                 {
@@ -60,17 +38,30 @@ namespace Salesforce.Composite.Tests
                     LastName = "Bunny"
                 }, out string contactId)
 
-                .RetrieveSobject<Contact>("NewContactInfo", contactId)
-
-                .UpdateSobject("UpdateAccount", new Account
+                .PatchSobject("UpdateAccount", new Account
                 {
                     Id = accountId,
                     EmployeeCount = 10
                 })
 
-                .RetrieveSobject<Account>("NewAccountInfo", accountId, out Account newAccount);
+                .RetrieveSobject<Contact>("NewContactInfo", contactId)
+                .RetrieveSobject<Account>("NewAccountInfo", accountId)
+                
+                .DeleteSobject<Account>("DeleteAccount", accountId)
 
-            var result = builder.Execute();
+                .Execute();
+        }
+
+        [Test]
+        public void UpdateSobjectWithNullProperties()
+        {
+            new CompositeBuilder()
+                .UpdateSobject<Account>("UpdateAccount", new Account
+                {
+                    Id = "Test",
+                    EmployeeCount = 100
+                })
+                .Execute();
         }
     }
 

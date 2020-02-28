@@ -24,18 +24,6 @@ namespace salesforce_composite.serialization
             return base.CreateMemberValueProvider(memberInfo);
         }
 
-        protected override JsonContract CreateContract(Type objectType)
-        {
-            JsonContract contract = base.CreateContract(objectType);
-
-            if(objectType == typeof(Sobject))
-            {
-                contract.Converter = new SobjectConverter();
-            }
-
-            return contract;
-        }
-
         protected override string ResolvePropertyName(string propertyName)
         {
             //Will contain a value if your Sobject class property has the [SalesforceName] attribute
@@ -68,7 +56,27 @@ namespace salesforce_composite.serialization
 
             if(attr is SalesforceSerializationAttribute)
             {
-                
+                var salesforceSerializationAttribute = attr as SalesforceSerializationAttribute;
+
+                if(_salesforceSerialization == SalesforceSerialization.CREATE && !salesforceSerializationAttribute.Create)
+                {
+                    return true;
+                }
+
+                if (_salesforceSerialization == SalesforceSerialization.RETRIEVE && !salesforceSerializationAttribute.Read)
+                {
+                    return true;
+                }
+
+                if ((_salesforceSerialization == SalesforceSerialization.UPDATE || _salesforceSerialization == SalesforceSerialization.PATCH) && !salesforceSerializationAttribute.Update)
+                {
+                    return true;
+                }
+
+                if (_salesforceSerialization == SalesforceSerialization.DELETE && !salesforceSerializationAttribute.Delete)
+                {
+                    return true;
+                }
             }
 
             return false;
