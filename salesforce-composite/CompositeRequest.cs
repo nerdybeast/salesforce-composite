@@ -6,6 +6,9 @@ using System.Text;
 using Newtonsoft.Json;
 using salesforce_composite.serialization;
 using System.Linq;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace salesforce_composite
 {
@@ -16,15 +19,19 @@ namespace salesforce_composite
     {
         private readonly List<Subrequest> _requests = new List<Subrequest>();
         private readonly bool _allOrNone;
+        private static HttpClient _client;
+        private int _salesforceApiVersion;
 
-        public CompositeBuilder(bool allOrNone = true)
+        public CompositeBuilder(HttpClient client, int salesforceApiVersion, bool allOrNone = true)
         {
+            _client = client;
+            _salesforceApiVersion = salesforceApiVersion;
             _allOrNone = allOrNone;
         }
 
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId) where T : Sobject
         {
-            var action = new RetrieveSobject(referenceId, typeof(T).Name, sobjectId);
+            var action = new RetrieveSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
             _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
 
             return this;
@@ -32,7 +39,7 @@ namespace salesforce_composite
 
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId, out T sobjectReference) where T : Sobject, new()
         {
-            var action = new RetrieveSobject(referenceId, typeof(T).Name, sobjectId);
+            var action = new RetrieveSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
             _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
             
             sobjectReference = new T().PrependValueToStringProperties(referenceId);
@@ -42,7 +49,7 @@ namespace salesforce_composite
 
         public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject, new()
         {
-            var action = new CreateSobject<T>(referenceId, typeof(T).Name, sobject);
+            var action = new CreateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             _requests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
 
             sobjectIdReference = $"@{{{referenceId}.id}}";
@@ -52,27 +59,27 @@ namespace salesforce_composite
 
         public CompositeBuilder UpdateSobject<T>(string referenceId, T sobject) where T : Sobject, new()
         {
-            var action = new UpdateSobject<T>(referenceId, typeof(T).Name, sobject);
+            var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             _requests.Add(new Subrequest(SalesforceSerialization.UPDATE, action));
             return this;
         }
 
         public CompositeBuilder PatchSobject<T>(string referenceId, T sobject) where T : Sobject, new()
         {
-            var action = new UpdateSobject<T>(referenceId, typeof(T).Name, sobject);
+            var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             _requests.Add(new Subrequest(SalesforceSerialization.PATCH, action));
             return this;
         }
 
         public CompositeBuilder DeleteSobject<T>(string referenceId, string sobjectId) where T : Sobject
         {
-            var action = new DeleteSobject(referenceId, typeof(T).Name, sobjectId);
+            var action = new DeleteSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
             _requests.Add(new Subrequest(SalesforceSerialization.DELETE, action));
 
             return this;
         }
 
-        public List<CompositeSubrequestResult> Execute()
+        public async Task<List<CompositeSubrequestResult>> ExecuteAsync()
         {
             var json = _requests.Select(req => 
             {
@@ -96,59 +103,57 @@ namespace salesforce_composite
 
             var body = $"{{ \"allOrNone\": {_allOrNone.ToString().ToLower()}, \"compositeRequest\": [{string.Join(",", json)}] }}";
 
-            ////Temp
-            //var httpClient = new HttpClient
-            //{
-            //    BaseAddress = new Uri("")
-            //};
+            var content = new StringContent(body);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            //httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "00D230000000...");
-            //HttpResponseMessage response = httpClient.PostAsJsonAsync("/services/data/v38.0/composite/", body).GetAwaiter().GetResult();
-            //var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            HttpResponseMessage response = await _client.PostAsync($"/services/data/v{_salesforceApiVersion}.0/composite/", content);
+            var result = await response.Content.ReadAsStringAsync();
 
-            return new List<CompositeSubrequestResult>();
+            var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(result);
+
+            return responseBody.CompositeResponse;
         }
     }
 
     public class RetrieveSobject : CompositeSobjectSubrequest<Sobject>
     {
-        public RetrieveSobject(string referenceId, string sobjectType, string sobjectId)
+        public RetrieveSobject(int salesforceApiVersion, string referenceId, string sobjectType, string sobjectId)
         {
             base.ReferenceId = referenceId;
             HttpMethod = CompositeHttpMethod.GET.ToString();
-            Url = $"/services/data/v38.0/sobjects/{sobjectType}/{sobjectId}";
+            Url = $"/services/data/v{salesforceApiVersion}.0/sobjects/{sobjectType}/{sobjectId}";
         }
     }
 
     public class CreateSobject<T> : CompositeSobjectSubrequest<T> where T : Sobject
     {
-        public CreateSobject(string referenceId, string sobjectType, T sobject)
+        public CreateSobject(int salesforceApiVersion, string referenceId, string sobjectType, T sobject)
         {
             base.ReferenceId = referenceId;
             HttpMethod = CompositeHttpMethod.POST.ToString();
-            Url = $"/services/data/v38.0/sobjects/{sobjectType}";
+            Url = $"/services/data/v{salesforceApiVersion}.0/sobjects/{sobjectType}";
             Body = sobject;
         }
     }
 
     public class UpdateSobject<T> : CompositeSobjectSubrequest<T> where T : Sobject
     {
-        public UpdateSobject(string referenceId, string sobjectType, T sobject)
+        public UpdateSobject(int salesforceApiVersion, string referenceId, string sobjectType, T sobject)
         {
             base.ReferenceId = referenceId;
             HttpMethod = CompositeHttpMethod.PATCH.ToString();
-            Url = $"/services/data/v38.0/sobjects/{sobjectType}/{sobject.Id}";
+            Url = $"/services/data/v{salesforceApiVersion}.0/sobjects/{sobjectType}/{sobject.Id}";
             Body = sobject;
         }
     }
 
     public class DeleteSobject : CompositeSobjectSubrequest<Sobject>
     {
-        public DeleteSobject(string referenceId, string sobjectType, string sobjectId)
+        public DeleteSobject(int salesforceApiVersion, string referenceId, string sobjectType, string sobjectId)
         {
             base.ReferenceId = referenceId;
             HttpMethod = CompositeHttpMethod.DELETE.ToString();
-            Url = $"/services/data/v38.0/sobjects/{sobjectType}/{sobjectId}";
+            Url = $"/services/data/v{salesforceApiVersion}.0/sobjects/{sobjectType}/{sobjectId}";
         }
     }
 }

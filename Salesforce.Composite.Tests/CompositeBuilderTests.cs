@@ -1,14 +1,44 @@
 using NUnit.Framework;
 using Salesforce.Composite.Tests.MockSobjects;
 using salesforce_composite;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Salesforce.Composite.Tests
 {
     public class CompositeBuilderTests
     {
+        private AppSettings _appSettings;
+        private static HttpClient _client;
+        private CompositeBuilder _builder;
+
+        [OneTimeSetUp]
+        public void SingleSetup()
+        {
+            var appSettings = new AppSettings();
+
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+                
+            config.GetSection("AppSettings").Bind(appSettings);
+
+            _appSettings = appSettings;
+
+            _client = new HttpClient
+            {
+                BaseAddress = new System.Uri(_appSettings.SalesforceDomain)
+            };
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _appSettings.SalesforceAccessToken);
+        }
+
         [SetUp]
         public void Setup()
         {
+            _builder = new CompositeBuilder(_client, _appSettings.SalesforceApiVersion);
         }
 
         [Test]
@@ -21,9 +51,9 @@ namespace Salesforce.Composite.Tests
         }
 
         [Test]
-        public void fdfdf()
+        public async Task fdfdf()
         {
-            new CompositeBuilder()
+            var builder = _builder
 
                 .CreateSobject("NewAccount", new Account
                 {
@@ -47,21 +77,10 @@ namespace Salesforce.Composite.Tests
                 .RetrieveSobject<Contact>("NewContactInfo", contactId)
                 .RetrieveSobject<Account>("NewAccountInfo", accountId)
                 
-                .DeleteSobject<Account>("DeleteAccount", accountId)
+                .DeleteSobject<Account>("DeleteAccount", accountId);
 
-                .Execute();
-        }
-
-        [Test]
-        public void UpdateSobjectWithNullProperties()
-        {
-            new CompositeBuilder()
-                .UpdateSobject<Account>("UpdateAccount", new Account
-                {
-                    Id = "Test",
-                    EmployeeCount = 100
-                })
-                .Execute();
+            var result = await builder.ExecuteAsync();
+            
         }
     }
 
