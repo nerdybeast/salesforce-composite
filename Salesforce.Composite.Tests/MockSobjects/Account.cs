@@ -10,6 +10,8 @@ namespace Salesforce.Composite.Tests.MockSobjects
     {
         public string Name { get; set; }
 
+        public string AccountNumber { get; set; }
+
         public string Description { get; set; }
 
         [SalesforceName("Total_Employees__c")]
@@ -17,5 +19,9 @@ namespace Salesforce.Composite.Tests.MockSobjects
 
         [SalesforceIgnore]
         public bool ShouldCancelAccount { get; set; }
+
+        [SalesforceName("CreatedBy")]
+        [SalesforceSerialization]
+        public string CreatedById { get; set; }
     }
 }

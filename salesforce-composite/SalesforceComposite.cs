@@ -10,20 +10,20 @@ namespace salesforce_composite
     {
         private readonly int SalesforceApiVersion;
         private readonly string SalesforceDomain;
-        private string BaseUrl => $"{SalesforceDomain}/services/data/v{SalesforceApiVersion}.0/composite/";
-        private HttpClient _client;
+        //private string BaseUrl => $"{SalesforceDomain}/services/data/v{SalesforceApiVersion}.0/composite/";
+        private static HttpClient _client;
 
-        public SalesforceComposite(int SalesforceApiVersion, string SalesforceDomain, string SalesforceAccessToken)
+        public SalesforceComposite(int salesforceApiVersion, string salesforceDomain, string salesforceAccessToken)
         {
-            this.SalesforceApiVersion = SalesforceApiVersion;
-            this.SalesforceDomain = SalesforceDomain;
+            this.SalesforceApiVersion = salesforceApiVersion;
+            this.SalesforceDomain = salesforceDomain;
 
             _client = new HttpClient
             {
-                BaseAddress = new Uri(BaseUrl)
+                BaseAddress = new Uri(salesforceDomain)
             };
 
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SalesforceAccessToken);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", salesforceAccessToken);
         }
 
         // public async Task<List<CompositeSubrequestResult>> SendAsync(List<CompositeSubrequestBase> compositeRequests, bool allOrNone = true)
@@ -38,5 +38,6 @@ namespace salesforce_composite
         //     CompositeResponseBody compositeResponseBody = await response.Content.ReadAsAsync<CompositeResponseBody>();
         //     return compositeResponseBody.CompositeResponse;
         // }
+
     }
 }

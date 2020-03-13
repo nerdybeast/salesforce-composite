@@ -11,7 +11,7 @@ namespace salesforce_composite.attributes
         public readonly bool Update;
         public readonly bool Delete;
 
-        public SalesforceSerializationAttribute(bool create, bool read, bool update, bool delete)
+        public SalesforceSerializationAttribute(bool create = false, bool read = true, bool update = false, bool delete = false)
         {
             Create = create;
             Read = read;

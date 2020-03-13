@@ -359,3 +359,6 @@ MigrationBackup/
 
 # Visual Studio Code settings - these are per user
 .vscode
+
+# 
+appsettings.json

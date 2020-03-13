@@ -7,10 +7,10 @@ namespace salesforce_composite
 {
     public class Sobject
     {
-        [SalesforceSerialization(create: false, read: true, update: false, delete: false)]
+        [SalesforceSerialization]
         public string Id { get; set; }
 
-        [SalesforceSerialization(create: false, read: true, update: false, delete: false)]
+        [SalesforceSerialization]
         public bool IsDeleted { get; set; }
     }
 }
