@@ -51,10 +51,9 @@ namespace Salesforce.Composite.Tests
             var referenceId = "NewAccount";
             var accountId = "12345";
 
-            var builder = new CompositeBuilder(_salesforceApiVersion)
-                .RetrieveSobject(referenceId, accountId, out Account accountRef);
+            _builder.RetrieveSobject(referenceId, accountId, out Account accountRef);
 
-            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+            Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
 
             Assert.IsNotNull(subrequest);
             Assert.AreEqual(SalesforceSerialization.RETRIEVE, subrequest.salesforceSerialization);
@@ -76,10 +75,9 @@ namespace Salesforce.Composite.Tests
                 Name = "Temp"
             };
 
-            var builder = new CompositeBuilder(_salesforceApiVersion)
-                .CreateSobject(referenceId, account, out string accountRef);
+            _builder.CreateSobject(referenceId, account, out string accountRef);
 
-            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+            Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
 
             Assert.IsNotNull(subrequest);
             Assert.AreEqual(SalesforceSerialization.CREATE, subrequest.salesforceSerialization);
@@ -90,9 +88,9 @@ namespace Salesforce.Composite.Tests
         }
 
         [Test]
-        public void fdfdf()
+        public async Task fdfdf()
         {
-            new CompositeBuilder(_salesforceApiVersion)
+            _builder
 
                 .CreateSobject("NewAccount", new Account
                 {
@@ -118,20 +116,8 @@ namespace Salesforce.Composite.Tests
                 
                 .DeleteSobject<Account>("DeleteAccount", accountId);
 
-            var result = await builder.ExecuteAsync();
+            var result = await _builder.ExecuteAsync();
             
-        }
-
-        [Test]
-        public void UpdateSobjectWithNullProperties()
-        {
-            new CompositeBuilder(_salesforceApiVersion)
-                .UpdateSobject<Account>("UpdateAccount", new Account
-                {
-                    Id = "Test",
-                    EmployeeCount = 100
-                })
-                .Execute();
         }
     }
 

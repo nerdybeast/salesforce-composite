@@ -7,6 +7,7 @@ using salesforce_composite.serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 
 namespace Salesforce.Composite.Tests
@@ -50,7 +51,7 @@ namespace Salesforce.Composite.Tests
             var referenceId = "TheRecord";
             var id = "12345";
 
-            var builder = new CompositeBuilder(_salesforceApiVersion)
+            var builder = new CompositeBuilder(new HttpClient(), _salesforceApiVersion)
                 .RetrieveSobject(referenceId, id, out MockSobject objRef);
 
             Subrequest subrequest = builder.Subrequests.FirstOrDefault();
@@ -76,7 +77,7 @@ namespace Salesforce.Composite.Tests
                 SecurityToken = "abc"
             };
 
-            var builder = new CompositeBuilder(_salesforceApiVersion)
+            var builder = new CompositeBuilder(new HttpClient(), _salesforceApiVersion)
                 .CreateSobject(referenceId, sobject);
 
             Subrequest subrequest = builder.Subrequests.FirstOrDefault();
