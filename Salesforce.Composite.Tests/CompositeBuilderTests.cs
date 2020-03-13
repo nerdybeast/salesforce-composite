@@ -1,29 +1,68 @@
 using NUnit.Framework;
 using Salesforce.Composite.Tests.MockSobjects;
 using salesforce_composite;
+using salesforce_composite.enums;
+using System.Linq;
 
 namespace Salesforce.Composite.Tests
 {
     public class CompositeBuilderTests
     {
+        private readonly int _salesforceApiVersion = 38;
+
         [SetUp]
         public void Setup()
         {
         }
 
         [Test]
-        public void Test1()
+        public void RetrieveSobject()
         {
-            var test = new TestDummy().PrependValueToStringProperties("TestPrepend");
-            Assert.AreEqual("@{TestPrepend.Test1}", test.Test1);
+            var referenceId = "NewAccount";
+            var accountId = "12345";
 
-            //new CompositeBuilder()
+            var builder = new CompositeBuilder(_salesforceApiVersion)
+                .RetrieveSobject(referenceId, accountId, out Account accountRef);
+
+            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+
+            Assert.IsNotNull(subrequest);
+            Assert.AreEqual(SalesforceSerialization.RETRIEVE, subrequest.salesforceSerialization);
+            Assert.AreEqual($"@{{{referenceId}.Name}}", accountRef.Name);
+            Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
+            Assert.AreEqual(CompositeHttpMethod.GET.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
+
+            var url = $"/services/data/v{_salesforceApiVersion}.0/sobjects/{typeof(Account).Name}/{accountId}";
+            Assert.AreEqual(url, subrequest.compositeSubrequestBase.Url);
+        }
+
+        [Test]
+        public void CreateSobject()
+        {
+            var referenceId = "NewAccount";
+
+            var account = new Account
+            {
+                Name = "Temp"
+            };
+
+            var builder = new CompositeBuilder(_salesforceApiVersion)
+                .CreateSobject(referenceId, account, out string accountRef);
+
+            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+
+            Assert.IsNotNull(subrequest);
+            Assert.AreEqual(SalesforceSerialization.CREATE, subrequest.salesforceSerialization);
+            Assert.AreEqual($"@{{{referenceId}.id}}", accountRef);
+            Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
+            Assert.AreEqual(CompositeHttpMethod.POST.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
+            Assert.AreEqual($"/services/data/v{_salesforceApiVersion}.0/sobjects/{account.GetType().Name}", subrequest.compositeSubrequestBase.Url);
         }
 
         [Test]
         public void fdfdf()
         {
-            new CompositeBuilder()
+            new CompositeBuilder(_salesforceApiVersion)
 
                 .CreateSobject("NewAccount", new Account
                 {
@@ -55,7 +94,7 @@ namespace Salesforce.Composite.Tests
         [Test]
         public void UpdateSobjectWithNullProperties()
         {
-            new CompositeBuilder()
+            new CompositeBuilder(_salesforceApiVersion)
                 .UpdateSobject<Account>("UpdateAccount", new Account
                 {
                     Id = "Test",
