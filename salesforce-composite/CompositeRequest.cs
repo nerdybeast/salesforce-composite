@@ -99,7 +99,26 @@ namespace salesforce_composite
             HttpResponseMessage response = await _client.PostAsync($"/services/data/v{_salesforceApiVersion}.0/composite/", content);
             var result = await response.Content.ReadAsStringAsync();
 
+            if(!response.IsSuccessStatusCode) {
+
+                var ex = new Exception("Salesforce communication error");
+
+                var errors = JsonConvert.DeserializeObject<List<SalesforceHtpError>>(result);
+
+                foreach(var error in errors) {
+                    ex.Data[error.ErrorCode] = error.Message;
+                }
+
+                throw ex;
+            }
+
             var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(result);
+
+            foreach (var compositeResponse in responseBody.CompositeResponse)
+            {
+                var subrequest = Subrequests.First(x => x.compositeSubrequestBase.ReferenceId == compositeResponse.ReferenceId);
+                var dasdasd = JsonConvert.DeserializeObject(compositeResponse.Body, subrequest.responseType);
+            }
 
             return responseBody.CompositeResponse;
         }

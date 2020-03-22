@@ -1,3 +1,5 @@
+using System;
+
 namespace salesforce_composite {
 	
 	public class Subrequest {
@@ -5,6 +7,8 @@ namespace salesforce_composite {
 		public CompositeSubrequestBase compositeSubrequestBase { get; set; }
 
 		public SalesforceSerialization salesforceSerialization { get; set; }
+
+		public Type responseType { get; set; }
 
 		public Subrequest(SalesforceSerialization salesforceSerialization, CompositeSubrequestBase compositeSubrequestBase) {
 			this.compositeSubrequestBase = compositeSubrequestBase;

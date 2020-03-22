@@ -7,9 +7,10 @@ namespace salesforce_composite
 {
     public class CompositeSubrequestResult
     {
-        public object Body { get; }
-        public Dictionary<string, string> HttpHeaders { get; }
-        public HttpStatusCode HttpStatusCode { get; }
-        public string ReferenceId { get; }
+        //public object Body { get; set; }
+        public string Body { get; set; }
+        public Dictionary<string, string> HttpHeaders { get; set; }
+        public HttpStatusCode HttpStatusCode { get; set; }
+        public string ReferenceId { get; set; }
     }
 }
