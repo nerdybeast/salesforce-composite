@@ -10,13 +10,12 @@ using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using salesforce_composite.ResponseModels;
+using Newtonsoft.Json.Linq;
 
 namespace Salesforce.Composite.Tests
 {
     public class CompositeBuilderTests
     {
-        private readonly int _salesforceApiVersion = 38;
-
         private AppSettings _appSettings;
         private static HttpClient _client;
         private CompositeBuilder _builder;
@@ -64,7 +63,7 @@ namespace Salesforce.Composite.Tests
             Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
             Assert.AreEqual(CompositeHttpMethod.GET.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
 
-            var url = $"/services/data/v{_salesforceApiVersion}.0/sobjects/{typeof(Account).Name}/{accountId}";
+            var url = $"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{typeof(Account).Name}/{accountId}";
             Assert.AreEqual(url, subrequest.compositeSubrequestBase.Url);
         }
 
@@ -87,10 +86,11 @@ namespace Salesforce.Composite.Tests
             Assert.AreEqual($"@{{{referenceId}.id}}", accountRef);
             Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
             Assert.AreEqual(CompositeHttpMethod.POST.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
-            Assert.AreEqual($"/services/data/v{_salesforceApiVersion}.0/sobjects/{account.GetType().Name}", subrequest.compositeSubrequestBase.Url);
+            Assert.AreEqual($"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{account.GetType().Name}", subrequest.compositeSubrequestBase.Url);
         }
 
         [Test]
+        [Explicit]
         public async Task fdfdf()
         {
             _builder
@@ -124,11 +124,12 @@ namespace Salesforce.Composite.Tests
         }
 
         [Test]
+        [Explicit]
         public async Task MultipleBuilders()
         {
             var referenceId = "NewAccount";
 
-            var builder = new CompositeBuilder(_client, _salesforceApiVersion)
+            var builder = new CompositeBuilder(_client, _appSettings.SalesforceApiVersion)
                 .CreateSobject(referenceId, new Account
                 {
                     Name = "Avengers Inc."
@@ -138,7 +139,7 @@ namespace Salesforce.Composite.Tests
 
             CompositeSubrequestResult newAccountResult = results.First(x => x.ReferenceId == referenceId);
 
-            CreateResponseModel res = (CreateResponseModel)newAccountResult.Body;
+            CreateResponseModel res = ((JObject)newAccountResult.Body).ToObject<CreateResponseModel>();
 
             await builder
                 .DeleteSobject<Account>("DeleteAccount", res.Id)
