@@ -9,6 +9,7 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using salesforce_composite.ResponseModels;
 
 namespace salesforce_composite
 {
@@ -17,10 +18,10 @@ namespace salesforce_composite
     /// </summary>
     public class CompositeBuilder
     {
-        private readonly List<Subrequest> _requests = new List<Subrequest>();
+        public List<Subrequest> Subrequests { get; } = new List<Subrequest>();
+        private readonly int _salesforceApiVersion;
         private readonly bool _allOrNone;
         private static HttpClient _client;
-        private int _salesforceApiVersion;
 
         public CompositeBuilder(HttpClient client, int salesforceApiVersion, bool allOrNone = true)
         {
@@ -32,7 +33,7 @@ namespace salesforce_composite
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId) where T : Sobject
         {
             var action = new RetrieveSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
-            _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
 
             return this;
         }
@@ -40,17 +41,25 @@ namespace salesforce_composite
         public CompositeBuilder RetrieveSobject<T>(string referenceId, string sobjectId, out T sobjectReference) where T : Sobject, new()
         {
             var action = new RetrieveSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
-            _requests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.RETRIEVE, action));
             
             sobjectReference = new T().PrependValueToStringProperties(referenceId);
             
             return this;
         }
 
+        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject) where T : Sobject, new()
+        {
+            var action = new CreateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
+            Subrequests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
+
+            return this;
+        }
+
         public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject, new()
         {
             var action = new CreateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
-            _requests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
 
             sobjectIdReference = $"@{{{referenceId}.id}}";
 
@@ -60,46 +69,33 @@ namespace salesforce_composite
         public CompositeBuilder UpdateSobject<T>(string referenceId, T sobject) where T : Sobject, new()
         {
             var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
-            _requests.Add(new Subrequest(SalesforceSerialization.UPDATE, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.UPDATE, action));
             return this;
         }
 
         public CompositeBuilder PatchSobject<T>(string referenceId, T sobject) where T : Sobject, new()
         {
             var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
-            _requests.Add(new Subrequest(SalesforceSerialization.PATCH, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.PATCH, action));
             return this;
         }
 
         public CompositeBuilder DeleteSobject<T>(string referenceId, string sobjectId) where T : Sobject
         {
             var action = new DeleteSobject(_salesforceApiVersion, referenceId, typeof(T).Name, sobjectId);
-            _requests.Add(new Subrequest(SalesforceSerialization.DELETE, action));
+            Subrequests.Add(new Subrequest(SalesforceSerialization.DELETE, action));
 
             return this;
         }
 
+        public void Clear()
+        {
+            Subrequests.Clear();
+        }
+
         public async Task<List<CompositeSubrequestResult>> ExecuteAsync()
         {
-            var json = _requests.Select(req => 
-            {
-                var nullValueHandling = NullValueHandling.Ignore;
-
-                if(req.salesforceSerialization == SalesforceSerialization.UPDATE)
-                {
-                    nullValueHandling = NullValueHandling.Include;
-                }
-
-                var settings = new JsonSerializerSettings
-                {
-                    ContractResolver = new SalesforceResolver(req.salesforceSerialization),
-                    NullValueHandling = nullValueHandling
-                };
-
-                var x = JsonConvert.SerializeObject(req.compositeSubrequestBase, Formatting.Indented, settings);
-
-                return x;
-            });
+            var json = Subrequests.Select(req => SubrequestSerialization.Serialize(req));
 
             var body = $"{{ \"allOrNone\": {_allOrNone.ToString().ToLower()}, \"compositeRequest\": [{string.Join(",", json)}] }}";
 
@@ -109,7 +105,36 @@ namespace salesforce_composite
             HttpResponseMessage response = await _client.PostAsync($"/services/data/v{_salesforceApiVersion}.0/composite/", content);
             var result = await response.Content.ReadAsStringAsync();
 
+            if(!response.IsSuccessStatusCode) {
+
+                var ex = new Exception("Salesforce communication error");
+
+                var errors = JsonConvert.DeserializeObject<List<SalesforceHtpError>>(result);
+
+                foreach(var error in errors) {
+                    ex.Data[error.ErrorCode] = error.Message;
+                }
+
+                throw ex;
+            }
+
+            Clear();
+
             var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(result);
+            //var results = new List<CompositeSubrequestResult<T>>();
+
+            //foreach (var compositeResponse in responseBody.CompositeResponse)
+            //{
+            //    var subrequest = Subrequests.First(x => x.compositeSubrequestBase.ReferenceId == compositeResponse.ReferenceId);
+
+            //    if(subrequest.salesforceSerialization == SalesforceSerialization.CREATE)
+            //    {
+            //        var convertedBody = JsonConvert.DeserializeObject<CreateResponseModel>(compositeResponse.Body);
+            //        var convertedSubrequestResult = new CompositeSubrequestResult<CreateResponseModel>(convertedBody, compositeResponse);
+            //    }
+
+            //    var dasdasd = JsonConvert.DeserializeObject(compositeResponse.Body, subrequest.responseType);
+            //}
 
             return responseBody.CompositeResponse;
         }

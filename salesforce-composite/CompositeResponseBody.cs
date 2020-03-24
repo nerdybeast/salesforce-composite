@@ -7,6 +7,6 @@ namespace salesforce_composite
 {
     public class CompositeResponseBody
     {
-        public List<CompositeSubrequestResult> CompositeResponse { get; }
+        public List<CompositeSubrequestResult> CompositeResponse { get; set; }
     }
 }
