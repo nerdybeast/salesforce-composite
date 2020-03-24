@@ -7,6 +7,9 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using salesforce_composite.enums;
 using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using salesforce_composite.ResponseModels;
 
 namespace Salesforce.Composite.Tests
 {
@@ -118,6 +121,28 @@ namespace Salesforce.Composite.Tests
 
             var result = await _builder.ExecuteAsync();
             
+        }
+
+        [Test]
+        public async Task MultipleBuilders()
+        {
+            var referenceId = "NewAccount";
+
+            var builder = new CompositeBuilder(_client, _salesforceApiVersion)
+                .CreateSobject(referenceId, new Account
+                {
+                    Name = "Avengers Inc."
+                });
+
+            List<CompositeSubrequestResult> results = await builder.ExecuteAsync();
+
+            CompositeSubrequestResult newAccountResult = results.First(x => x.ReferenceId == referenceId);
+
+            CreateResponseModel res = (CreateResponseModel)newAccountResult.Body;
+
+            await builder
+                .DeleteSobject<Account>("DeleteAccount", res.Id)
+                .ExecuteAsync();
         }
     }
 

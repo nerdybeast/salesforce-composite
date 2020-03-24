@@ -20,7 +20,7 @@ namespace Salesforce.Composite.Tests.MockSobjects
         [SalesforceIgnore]
         public bool ShouldCancelAccount { get; set; }
 
-        [SalesforceName("CreatedBy")]
+        //[SalesforceName("CreatedBy")]
         [SalesforceSerialization]
         public string CreatedById { get; set; }
     }

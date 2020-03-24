@@ -9,6 +9,7 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using salesforce_composite.ResponseModels;
 
 namespace salesforce_composite
 {
@@ -87,6 +88,11 @@ namespace salesforce_composite
             return this;
         }
 
+        public void Clear()
+        {
+            Subrequests.Clear();
+        }
+
         public async Task<List<CompositeSubrequestResult>> ExecuteAsync()
         {
             var json = Subrequests.Select(req => SubrequestSerialization.Serialize(req));
@@ -112,13 +118,23 @@ namespace salesforce_composite
                 throw ex;
             }
 
-            var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(result);
+            Clear();
 
-            foreach (var compositeResponse in responseBody.CompositeResponse)
-            {
-                var subrequest = Subrequests.First(x => x.compositeSubrequestBase.ReferenceId == compositeResponse.ReferenceId);
-                var dasdasd = JsonConvert.DeserializeObject(compositeResponse.Body, subrequest.responseType);
-            }
+            var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(result);
+            //var results = new List<CompositeSubrequestResult<T>>();
+
+            //foreach (var compositeResponse in responseBody.CompositeResponse)
+            //{
+            //    var subrequest = Subrequests.First(x => x.compositeSubrequestBase.ReferenceId == compositeResponse.ReferenceId);
+
+            //    if(subrequest.salesforceSerialization == SalesforceSerialization.CREATE)
+            //    {
+            //        var convertedBody = JsonConvert.DeserializeObject<CreateResponseModel>(compositeResponse.Body);
+            //        var convertedSubrequestResult = new CompositeSubrequestResult<CreateResponseModel>(convertedBody, compositeResponse);
+            //    }
+
+            //    var dasdasd = JsonConvert.DeserializeObject(compositeResponse.Body, subrequest.responseType);
+            //}
 
             return responseBody.CompositeResponse;
         }

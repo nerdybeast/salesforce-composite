@@ -1,0 +1,80 @@
+{
+  "compositeResponse": [
+    {
+      "body": {
+        "id": "0012300000ThLoyAAF",
+        "success": true,
+        "errors": []
+      },
+      "httpHeaders": {
+        "Location": "/services/data/v38.0/sobjects/Account/0012300000ThLoyAAF"
+      },
+      "httpStatusCode": 201,
+      "referenceId": "NewAccount"
+    },
+    {
+      "body": {
+        "id": "0032300000ODVQdAAP",
+        "success": true,
+        "errors": []
+      },
+      "httpHeaders": {
+        "Location": "/services/data/v38.0/sobjects/Contact/0032300000ODVQdAAP"
+      },
+      "httpStatusCode": 201,
+      "referenceId": "NewContact"
+    },
+    {
+      "body": null,
+      "httpHeaders": {},
+      "httpStatusCode": 204,
+      "referenceId": "UpdateAccount"
+    },
+    {
+      "body": {
+        "attributes": {
+          "type": "Contact",
+          "url": "/services/data/v38.0/sobjects/Contact/0032300000ODVQdAAP"
+        },
+        "Id": "0032300000ODVQdAAP",
+        "IsDeleted": false,
+        "AccountId": "0012300000ThLoyAAF",
+        "LastName": "Bunny",
+        "FirstName": "Bugs",
+        "Birthdate": "1940-02-15"
+      },
+      "httpHeaders": {
+        "Last-Modified": "Tue, 24 Mar 2020 02:17:20 GMT"
+      },
+      "httpStatusCode": 200,
+      "referenceId": "NewContactInfo"
+    },
+    {
+      "body": {
+        "attributes": {
+          "type": "Account",
+          "url": "/services/data/v38.0/sobjects/Account/0012300000ThLoyAAF"
+        },
+        "Id": "0012300000ThLoyAAF",
+        "IsDeleted": false,
+        "Name": "A-12952218",
+        "AccountNumber": null,
+        "Description": null,
+        "Total_Employees__c": 10.0,
+        "CreatedById": "005G0000003pal8IAA"
+      },
+      "httpHeaders": {
+        "ETag": "\"r+xrsdJ/hKZqeBdLmf9cM6XpLq0fV5VuRhpoyNanCKs=\"",
+        "Last-Modified": "Tue, 24 Mar 2020 02:17:20 GMT"
+      },
+      "httpStatusCode": 200,
+      "referenceId": "NewAccountInfo"
+    },
+    {
+      "body": null,
+      "httpHeaders": {},
+      "httpStatusCode": 204,
+      "referenceId": "DeleteAccount"
+    }
+  ]
+}
