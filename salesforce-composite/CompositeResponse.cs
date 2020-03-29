@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -25,10 +26,16 @@ namespace salesforce_composite
         //    ReferenceId = compositeSubrequestResult.ReferenceId;
         //}
 
-        public object Body { get; set; }
+        [JsonProperty("body")]
+        public object RawBody { get; set; }
+        
         public Dictionary<string, string> HttpHeaders { get; set; }
         public HttpStatusCode HttpStatusCode { get; set; }
         public string ReferenceId { get; set; }
+
+        public T Body<T>() where T : class {
+            return ((JObject)RawBody).ToObject<T>();
+        }
     }
 
     //public class CompositeSubrequestResultBase

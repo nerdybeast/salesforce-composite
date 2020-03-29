@@ -23,15 +23,16 @@ namespace Salesforce.Composite.Tests
         }
 
         [Test]
-        public void asdasd()
+        public void DefaultDeserialization()
         {
             var responseBody = JsonConvert.DeserializeObject<CompositeResponseBody>(_data);
+            List<CompositeSubrequestResult> results = responseBody.CompositeResponse;
 
-            var newAccountResult = responseBody.CompositeResponse.First(x => x.ReferenceId == "NewAccount");
-            var newAccountModel = ((JObject)newAccountResult.Body).ToObject<CreateResponseModel>();
+            var newAccountResult = results.First(x => x.ReferenceId == "NewAccount");
+            var newAccountCreationResult = newAccountResult.Body<CreateResponseModel>();
 
-            var newContactInfoResult = responseBody.CompositeResponse.First(x => x.ReferenceId == "NewContactInfo");
-            var newContactInfoModel = ((JObject)newContactInfoResult.Body).ToObject<Contact>();
+            var newContactInfoResult = results.First(x => x.ReferenceId == "NewContactInfo");
+            var newContactInfoModel = newContactInfoResult.Body<Contact>();
         }
     }
 }

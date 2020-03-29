@@ -139,7 +139,7 @@ namespace Salesforce.Composite.Tests
 
             CompositeSubrequestResult newAccountResult = results.First(x => x.ReferenceId == referenceId);
 
-            CreateResponseModel res = ((JObject)newAccountResult.Body).ToObject<CreateResponseModel>();
+            CreateResponseModel res = ((JObject)newAccountResult.RawBody).ToObject<CreateResponseModel>();
 
             await builder
                 .DeleteSobject<Account>("DeleteAccount", res.Id)
