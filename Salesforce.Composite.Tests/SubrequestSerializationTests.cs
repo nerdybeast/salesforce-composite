@@ -15,6 +15,7 @@ namespace Salesforce.Composite.Tests
     public class SubrequestSerializationTests
     {
         private readonly int _salesforceApiVersion = 38;
+        private CompositeBuilder _compositeBuilder;
 
         private class MockSobject : Sobject
         {
@@ -42,7 +43,7 @@ namespace Salesforce.Composite.Tests
         [SetUp]
         public void Setup()
         {
-
+            _compositeBuilder = new CompositeBuilder(null, _salesforceApiVersion);
         }
 
         [Test]
@@ -51,8 +52,7 @@ namespace Salesforce.Composite.Tests
             var referenceId = "TheRecord";
             var id = "12345";
 
-            var builder = new CompositeBuilder(new HttpClient(), _salesforceApiVersion)
-                .RetrieveSobject(referenceId, id, out MockSobject objRef);
+            var builder = _compositeBuilder.RetrieveSobject(referenceId, id, out MockSobject objRef);
 
             Subrequest subrequest = builder.Subrequests.FirstOrDefault();
             Assert.IsNotNull(subrequest);
@@ -62,6 +62,7 @@ namespace Salesforce.Composite.Tests
             Assert.That(json.Contains($"\"method\":\"GET\""));
             Assert.That(json.Contains($"\"url\":\"/services/data/v{_salesforceApiVersion}.0/sobjects/{typeof(MockSobject).Name}/{id}\""));
             Assert.That(json.Contains($"\"referenceId\":\"{referenceId}\""));
+
             Assert.That(!json.Contains("body"));
         }
 
@@ -70,15 +71,9 @@ namespace Salesforce.Composite.Tests
         {
             var referenceId = "TheRecord";
 
-            var sobject = new MockSobject
-            {
-                Username = "Tony",
-                Password = "Stark",
-                SecurityToken = "abc"
-            };
+            MockSobject sobject = CreateDefaultMockSobject();
 
-            var builder = new CompositeBuilder(new HttpClient(), _salesforceApiVersion)
-                .CreateSobject(referenceId, sobject);
+            var builder = _compositeBuilder.CreateSobject(referenceId, sobject);
 
             Subrequest subrequest = builder.Subrequests.FirstOrDefault();
             Assert.IsNotNull(subrequest);
@@ -96,6 +91,69 @@ namespace Salesforce.Composite.Tests
             Assert.That(!json.Contains("ReadOnlyField"));
             Assert.That(!json.Contains("UpdateOnlyField"));
             Assert.That(!json.Contains("DeleteOnlyField"));
+        }
+
+        [Test]
+        public void UpdateSobject()
+        {
+            var referenceId = "TheRecord";
+            var id = "1qa2ws3ed4rf5tg6yh";
+
+            MockSobject sobject = CreateDefaultMockSobject(id);
+
+            var builder = _compositeBuilder.UpdateSobject(referenceId, sobject);
+
+            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+            Assert.IsNotNull(subrequest);
+
+            string json = SubrequestSerialization.Serialize(subrequest, Formatting.None);
+
+            Assert.That(json.Contains($"\"method\":\"PATCH\""));
+            Assert.That(json.Contains($"\"url\":\"/services/data/v{_salesforceApiVersion}.0/sobjects/{typeof(MockSobject).Name}/{id}\""));
+            Assert.That(json.Contains($"\"Username\":\"{sobject.Username}\""));
+            Assert.That(json.Contains($"\"Security_Token__c\":\"{sobject.SecurityToken}\""));
+            Assert.That(json.Contains($"\"referenceId\":\"{referenceId}\""));
+            Assert.That(json.Contains($"UpdateOnlyField"));
+
+            Assert.That(!json.Contains("Password"));
+            Assert.That(!json.Contains("ReadOnlyField"));
+            Assert.That(!json.Contains("CreateOnlyField"));
+            Assert.That(!json.Contains("DeleteOnlyField"));
+        }
+
+        [Test]
+        public void DeleteSobject() {
+
+            var referenceId = "TheRecord";
+            var id = "1qa2ws3ed4rf5tg6yh";
+
+            MockSobject sobject = CreateDefaultMockSobject(id);
+
+            var builder = _compositeBuilder.DeleteSobject<MockSobject>(referenceId, id);
+
+            Subrequest subrequest = builder.Subrequests.FirstOrDefault();
+            Assert.IsNotNull(subrequest);
+
+            string json = SubrequestSerialization.Serialize(subrequest, Formatting.None);
+
+            Assert.That(json.Contains($"\"method\":\"DELETE\""));
+            Assert.That(json.Contains($"\"url\":\"/services/data/v{_salesforceApiVersion}.0/sobjects/{typeof(MockSobject).Name}/{id}\""));
+            Assert.That(json.Contains($"\"referenceId\":\"{referenceId}\""));
+
+            Assert.That(!json.Contains("body"));
+        }
+
+        private MockSobject CreateDefaultMockSobject(string id = null) {
+            return new MockSobject {
+                CreateOnlyField = 100,
+                DeleteOnlyField = 100,
+                ReadOnlyField = 100,
+                UpdateOnlyField = 100,
+                Password = "project-pegasus",
+                Username = "Tony Stark",
+                SecurityToken = "123456",
+                Id = id
+            };
         }
     }
 }

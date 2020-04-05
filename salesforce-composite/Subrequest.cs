@@ -8,8 +8,6 @@ namespace salesforce_composite {
 
 		public SalesforceSerialization salesforceSerialization { get; set; }
 
-		public Type responseType { get; set; }
-
 		public Subrequest(SalesforceSerialization salesforceSerialization, CompositeSubrequestBase compositeSubrequestBase) {
 			this.compositeSubrequestBase = compositeSubrequestBase;
 			this.salesforceSerialization = salesforceSerialization;
