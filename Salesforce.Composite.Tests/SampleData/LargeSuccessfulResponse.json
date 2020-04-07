@@ -1,0 +1,193 @@
+{
+	"compositeResponse": [
+		{
+			"body": {
+				"id": "001f400001KlhjSAAR",
+				"success": true,
+				"errors": []
+			},
+			"httpHeaders": {
+				"Location": "/services/data/v47.0/sobjects/Account/001f400001KlhjSAAR"
+			},
+			"httpStatusCode": 201,
+			"referenceId": "NewAccount"
+		},
+		{
+			"body": {
+				"id": "003f400001PNAUBAA5",
+				"success": true,
+				"errors": []
+			},
+			"httpHeaders": {
+				"Location": "/services/data/v47.0/sobjects/Contact/003f400001PNAUBAA5"
+			},
+			"httpStatusCode": 201,
+			"referenceId": "NewContact"
+		},
+		{
+			"body": null,
+			"httpHeaders": {},
+			"httpStatusCode": 204,
+			"referenceId": "UpdateAccount"
+		},
+		{
+			"body": {
+				"attributes": {
+					"type": "Contact",
+					"url": "/services/data/v47.0/sobjects/Contact/003f400001PNAUBAA5"
+				},
+				"Id": "003f400001PNAUBAA5",
+				"IsDeleted": false,
+				"MasterRecordId": null,
+				"AccountId": "001f400001KlhjSAAR",
+				"LastName": "Bunny",
+				"FirstName": "Bugs",
+				"Salutation": null,
+				"Name": "Bugs Bunny",
+				"OtherStreet": null,
+				"OtherCity": null,
+				"OtherState": null,
+				"OtherPostalCode": null,
+				"OtherCountry": null,
+				"OtherLatitude": null,
+				"OtherLongitude": null,
+				"OtherGeocodeAccuracy": null,
+				"OtherAddress": null,
+				"MailingStreet": null,
+				"MailingCity": null,
+				"MailingState": null,
+				"MailingPostalCode": null,
+				"MailingCountry": null,
+				"MailingLatitude": null,
+				"MailingLongitude": null,
+				"MailingGeocodeAccuracy": null,
+				"MailingAddress": null,
+				"Phone": null,
+				"Fax": null,
+				"MobilePhone": null,
+				"HomePhone": null,
+				"OtherPhone": null,
+				"AssistantPhone": null,
+				"ReportsToId": null,
+				"Email": null,
+				"Title": null,
+				"Department": null,
+				"AssistantName": null,
+				"LeadSource": null,
+				"Birthdate": null,
+				"Description": null,
+				"OwnerId": "005f4000000ttSAAAY",
+				"CreatedDate": "2020-04-07T03:39:42.000+0000",
+				"CreatedById": "005f4000000ttSAAAY",
+				"LastModifiedDate": "2020-04-07T03:39:42.000+0000",
+				"LastModifiedById": "005f4000000ttSAAAY",
+				"SystemModstamp": "2020-04-07T03:39:42.000+0000",
+				"LastActivityDate": null,
+				"LastCURequestDate": null,
+				"LastCUUpdateDate": null,
+				"LastViewedDate": "2020-04-07T03:39:42.000+0000",
+				"LastReferencedDate": "2020-04-07T03:39:42.000+0000",
+				"EmailBouncedReason": null,
+				"EmailBouncedDate": null,
+				"IsEmailBounced": false,
+				"PhotoUrl": "/services/images/photo/003f400001PNAUBAA5",
+				"Jigsaw": null,
+				"JigsawContactId": null,
+				"CleanStatus": "Pending",
+				"IndividualId": null,
+				"Level__c": null,
+				"Languages__c": null
+			},
+			"httpHeaders": {
+				"Last-Modified": "Tue, 7 Apr 2020 03:39:42 GMT"
+			},
+			"httpStatusCode": 200,
+			"referenceId": "NewContactInfo"
+		},
+		{
+			"body": {
+				"attributes": {
+					"type": "Account",
+					"url": "/services/data/v47.0/sobjects/Account/001f400001KlhjSAAR"
+				},
+				"Id": "001f400001KlhjSAAR",
+				"IsDeleted": false,
+				"MasterRecordId": null,
+				"Name": "ACME",
+				"Type": null,
+				"ParentId": null,
+				"BillingStreet": null,
+				"BillingCity": null,
+				"BillingState": null,
+				"BillingPostalCode": null,
+				"BillingCountry": null,
+				"BillingLatitude": null,
+				"BillingLongitude": null,
+				"BillingGeocodeAccuracy": null,
+				"BillingAddress": null,
+				"ShippingStreet": null,
+				"ShippingCity": null,
+				"ShippingState": null,
+				"ShippingPostalCode": null,
+				"ShippingCountry": null,
+				"ShippingLatitude": null,
+				"ShippingLongitude": null,
+				"ShippingGeocodeAccuracy": null,
+				"ShippingAddress": null,
+				"Phone": null,
+				"Fax": null,
+				"AccountNumber": null,
+				"Website": null,
+				"PhotoUrl": "/services/images/photo/001f400001KlhjSAAR",
+				"Sic": null,
+				"Industry": null,
+				"AnnualRevenue": null,
+				"NumberOfEmployees": 10,
+				"Ownership": null,
+				"TickerSymbol": null,
+				"Description": null,
+				"Rating": null,
+				"Site": null,
+				"OwnerId": "005f4000000ttSAAAY",
+				"CreatedDate": "2020-04-07T03:39:42.000+0000",
+				"CreatedById": "005f4000000ttSAAAY",
+				"LastModifiedDate": "2020-04-07T03:39:42.000+0000",
+				"LastModifiedById": "005f4000000ttSAAAY",
+				"SystemModstamp": "2020-04-07T03:39:42.000+0000",
+				"LastActivityDate": null,
+				"LastViewedDate": "2020-04-07T03:39:42.000+0000",
+				"LastReferencedDate": "2020-04-07T03:39:42.000+0000",
+				"Jigsaw": null,
+				"JigsawCompanyId": null,
+				"CleanStatus": "Pending",
+				"AccountSource": null,
+				"DunsNumber": null,
+				"Tradestyle": null,
+				"NaicsCode": null,
+				"NaicsDesc": null,
+				"YearStarted": null,
+				"SicDesc": null,
+				"DandbCompanyId": null,
+				"CustomerPriority__c": null,
+				"SLA__c": null,
+				"Active__c": null,
+				"NumberofLocations__c": null,
+				"UpsellOpportunity__c": null,
+				"SLASerialNumber__c": null,
+				"SLAExpirationDate__c": null
+			},
+			"httpHeaders": {
+				"ETag": "\\\"G1Nv+Sb4ET8yi4FNWG9QT/ZcEmJXKJ6PxWEsxnJOmzw=\\\"",
+				"Last-Modified": "Tue, 7 Apr 2020 03:39:42 GMT"
+			},
+			"httpStatusCode": 200,
+			"referenceId": "NewAccountInfo"
+		},
+		{
+			"body": null,
+			"httpHeaders": {},
+			"httpStatusCode": 204,
+			"referenceId": "DeleteAccount"
+		}
+	]
+}

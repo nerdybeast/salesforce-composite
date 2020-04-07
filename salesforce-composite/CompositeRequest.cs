@@ -48,7 +48,7 @@ namespace salesforce_composite
             return this;
         }
 
-        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject) where T : Sobject, new()
+        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject) where T : Sobject
         {
             var action = new CreateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             Subrequests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
@@ -56,7 +56,7 @@ namespace salesforce_composite
             return this;
         }
 
-        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject, new()
+        public CompositeBuilder CreateSobject<T>(string referenceId, T sobject, out string sobjectIdReference) where T : Sobject
         {
             var action = new CreateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             Subrequests.Add(new Subrequest(SalesforceSerialization.CREATE, action));
@@ -66,14 +66,36 @@ namespace salesforce_composite
             return this;
         }
 
-        public CompositeBuilder UpdateSobject<T>(string referenceId, T sobject) where T : Sobject, new()
+        /// <summary>
+        /// Runs a full sobject update request to Salesforce, any null properties will be sent in the request
+        /// which will null those values out inside of Salesforce.
+        /// </summary>
+        /// <param name="referenceId"></param>
+        /// <param name="sobject"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public CompositeBuilder UpdateSobject<T>(string referenceId, T sobject) where T : Sobject
         {
             var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             Subrequests.Add(new Subrequest(SalesforceSerialization.UPDATE, action));
             return this;
         }
 
-        public CompositeBuilder PatchSobject<T>(string referenceId, T sobject) where T : Sobject, new()
+        /// <summary>
+        /// Runs a soft update request to Salesforce, any null properties will be witheld from the request.
+        /// Example:
+        /// 
+        /// PatchSobject("AccountPatch", new Account {
+        ///     Name: "ACME",
+        ///     Description: null //This property will be ignored because it's null
+        /// });
+        /// 
+        /// </summary>
+        /// <param name="referenceId"></param>
+        /// <param name="sobject"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public CompositeBuilder PatchSobject<T>(string referenceId, T sobject) where T : Sobject
         {
             var action = new UpdateSobject<T>(_salesforceApiVersion, referenceId, typeof(T).Name, sobject);
             Subrequests.Add(new Subrequest(SalesforceSerialization.PATCH, action));

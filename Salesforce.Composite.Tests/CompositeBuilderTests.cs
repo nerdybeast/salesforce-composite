@@ -14,157 +14,72 @@ using Newtonsoft.Json.Linq;
 
 namespace Salesforce.Composite.Tests
 {
-    public class CompositeBuilderTests
-    {
-        private AppSettings _appSettings;
-        private static HttpClient _client;
-        private CompositeBuilder _builder;
+	public class CompositeBuilderTests
+	{
+		private AppSettings _appSettings;
+		private static HttpClient _client = new HttpClient();
+		private CompositeBuilder _builder;
 
-        [OneTimeSetUp]
-        public void SingleSetup()
-        {
-            var appSettings = new AppSettings();
+		[OneTimeSetUp]
+		public void SingleSetup()
+		{
+			var appSettings = new AppSettings();
 
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-                
-            config.GetSection("AppSettings").Bind(appSettings);
+			var config = new ConfigurationBuilder()
+				.AddJsonFile("appsettings.json")
+				.Build();
+				
+			config.GetSection("AppSettings").Bind(appSettings);
 
-            _appSettings = appSettings;
+			_appSettings = appSettings;
+		}
 
-            _client = new HttpClient
-            {
-                BaseAddress = new System.Uri(_appSettings.SalesforceDomain)
-            };
+		[SetUp]
+		public void Setup()
+		{
+			_builder = new CompositeBuilder(_client, _appSettings.SalesforceApiVersion);
+		}
 
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _appSettings.SalesforceAccessToken);
-        }
+		[Test]
+		public void RetrieveSobject()
+		{
+			var referenceId = "NewAccount";
+			var accountId = "12345";
 
-        [SetUp]
-        public void Setup()
-        {
-            _builder = new CompositeBuilder(_client, _appSettings.SalesforceApiVersion);
-        }
+			_builder.RetrieveSobject(referenceId, accountId, out Account accountRef);
 
-        [Test]
-        public void RetrieveSobject()
-        {
-            var referenceId = "NewAccount";
-            var accountId = "12345";
+			Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
 
-            _builder.RetrieveSobject(referenceId, accountId, out Account accountRef);
+			Assert.IsNotNull(subrequest);
+			Assert.AreEqual(SalesforceSerialization.RETRIEVE, subrequest.salesforceSerialization);
+			Assert.AreEqual($"@{{{referenceId}.Name}}", accountRef.Name);
+			Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
+			Assert.AreEqual(CompositeHttpMethod.GET.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
 
-            Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
+			var url = $"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{typeof(Account).Name}/{accountId}";
+			Assert.AreEqual(url, subrequest.compositeSubrequestBase.Url);
+		}
 
-            Assert.IsNotNull(subrequest);
-            Assert.AreEqual(SalesforceSerialization.RETRIEVE, subrequest.salesforceSerialization);
-            Assert.AreEqual($"@{{{referenceId}.Name}}", accountRef.Name);
-            Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
-            Assert.AreEqual(CompositeHttpMethod.GET.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
+		[Test]
+		public void CreateSobject()
+		{
+			var referenceId = "NewAccount";
 
-            var url = $"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{typeof(Account).Name}/{accountId}";
-            Assert.AreEqual(url, subrequest.compositeSubrequestBase.Url);
-        }
+			var account = new Account
+			{
+				Name = "Temp"
+			};
 
-        [Test]
-        public void CreateSobject()
-        {
-            var referenceId = "NewAccount";
+			_builder.CreateSobject(referenceId, account, out string accountRef);
 
-            var account = new Account
-            {
-                Name = "Temp"
-            };
+			Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
 
-            _builder.CreateSobject(referenceId, account, out string accountRef);
-
-            Subrequest subrequest = _builder.Subrequests.FirstOrDefault();
-
-            Assert.IsNotNull(subrequest);
-            Assert.AreEqual(SalesforceSerialization.CREATE, subrequest.salesforceSerialization);
-            Assert.AreEqual($"@{{{referenceId}.id}}", accountRef);
-            Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
-            Assert.AreEqual(CompositeHttpMethod.POST.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
-            Assert.AreEqual($"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{account.GetType().Name}", subrequest.compositeSubrequestBase.Url);
-        }
-
-        [Test]
-        [Explicit]
-        public async Task fdfdf()
-        {
-            _builder
-
-                .CreateSobject("NewAccount", new Account
-                {
-                    Name = "ACME",
-                    EmployeeCount = 100
-                }, out string accountId)
-
-                .CreateSobject("NewContact", new Contact
-                {
-                    AccountId = accountId,
-                    FirstName = "Bugs",
-                    LastName = "Bunny"
-                }, out string contactId)
-
-                .PatchSobject("UpdateAccount", new Account
-                {
-                    Id = accountId,
-                    EmployeeCount = 10
-                })
-
-                .RetrieveSobject<Contact>("NewContactInfo", contactId)
-                .RetrieveSobject<Account>("NewAccountInfo", accountId)
-                
-                .DeleteSobject<Account>("DeleteAccount", accountId);
-
-            var result = await _builder.ExecuteAsync();
-            
-        }
-
-        [Test]
-        [Explicit]
-        public async Task MultipleBuilders()
-        {
-            var referenceId = "NewAccount";
-
-            var builder = new CompositeBuilder(_client, _appSettings.SalesforceApiVersion)
-                .CreateSobject(referenceId, new Account
-                {
-                    Name = "Avengers Inc."
-                });
-
-            List<CompositeSubrequestResult> results = await builder.ExecuteAsync();
-
-            CompositeSubrequestResult newAccountResult = results.First(x => x.ReferenceId == referenceId);
-
-            CreateResponseModel res = ((JObject)newAccountResult.RawBody).ToObject<CreateResponseModel>();
-
-            await builder
-                .DeleteSobject<Account>("DeleteAccount", res.Id)
-                .ExecuteAsync();
-        }
-    }
-
-    public class TestDummy
-    {
-        private string _privateTestField;
-
-        public string PublicTestField;
-
-        public TestDummy()
-        {
-            this._privateTestField = "this is test (private field)";
-            this.PublicTestField = "this is test (public field)";
-
-            this.Test1 = "this is test #1";
-            this.Test2 = "this is test #2";
-            this.Test3 = "this is test #3";
-        }
-
-        public string Test1 { get; set; }
-        public string Test2 { get; private set; }
-        private string Test3 { get; set; }
-    }
+			Assert.IsNotNull(subrequest);
+			Assert.AreEqual(SalesforceSerialization.CREATE, subrequest.salesforceSerialization);
+			Assert.AreEqual($"@{{{referenceId}.id}}", accountRef);
+			Assert.AreEqual(referenceId, subrequest.compositeSubrequestBase.ReferenceId);
+			Assert.AreEqual(CompositeHttpMethod.POST.ToString(), subrequest.compositeSubrequestBase.HttpMethod);
+			Assert.AreEqual($"/services/data/v{_appSettings.SalesforceApiVersion}.0/sobjects/{account.GetType().Name}", subrequest.compositeSubrequestBase.Url);
+		}
+	}
 }

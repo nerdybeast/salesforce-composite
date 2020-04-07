@@ -1,0 +1,70 @@
+{
+	"compositeResponse": [
+		{
+			"body": [
+				{
+					"message": "No such column 'Total_Employees__c' on sobject of type Account",
+					"errorCode": "INVALID_FIELD"
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "NewAccount"
+		},
+		{
+			"body": [
+				{
+					"errorCode": "PROCESSING_HALTED",
+					"message": "The transaction was rolled back since another operation in the same transaction failed."
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "NewContact"
+		},
+		{
+			"body": [
+				{
+					"errorCode": "PROCESSING_HALTED",
+					"message": "The transaction was rolled back since another operation in the same transaction failed."
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "UpdateAccount"
+		},
+		{
+			"body": [
+				{
+					"errorCode": "PROCESSING_HALTED",
+					"message": "The transaction was rolled back since another operation in the same transaction failed."
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "NewContactInfo"
+		},
+		{
+			"body": [
+				{
+					"errorCode": "PROCESSING_HALTED",
+					"message": "The transaction was rolled back since another operation in the same transaction failed."
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "NewAccountInfo"
+		},
+		{
+			"body": [
+				{
+					"errorCode": "PROCESSING_HALTED",
+					"message": "The transaction was rolled back since another operation in the same transaction failed."
+				}
+			],
+			"httpHeaders": {},
+			"httpStatusCode": 400,
+			"referenceId": "DeleteAccount"
+		}
+	]
+}
