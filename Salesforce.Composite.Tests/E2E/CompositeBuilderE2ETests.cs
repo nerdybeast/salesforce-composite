@@ -85,7 +85,7 @@ namespace Salesforce.Composite.Tests.E2E
 				.RetrieveSobject<Account>("NewAccountInfo", accountIdReference)
 				.DeleteSobject<Account>("DeleteAccount", accountIdReference);
 
-			var results = await _builder.ExecuteAsync();
+			List<CompositeSubrequestResult> results = await _builder.ExecuteAsync();
 			
 			CompositeSubrequestResult newAccountResult = results.FirstOrDefault(x => x.ReferenceId == "NewAccount");
 			newAccountResult.Should().NotBeNull();
