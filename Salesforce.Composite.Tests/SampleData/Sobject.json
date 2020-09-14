@@ -1,0 +1,12 @@
+{
+	"attributes": {
+		"type": "Contact",
+		"url": "/services/data/v38.0/sobjects/Contact/0032300000ODVQdAAP"
+	},
+	"Id": "0032300000ODVQdAAP",
+	"IsDeleted": false,
+	"AccountId": "0012300000ThLoyAAF",
+	"LastName": "Bunny",
+	"FirstName": "Bugs",
+	"Birthdate": "1940-02-15"
+}

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using salesforce_composite.serialization;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -39,7 +40,9 @@ namespace salesforce_composite
 				return null; //Maybe throw an exception here ???
 			}
 
-			return RawBody.ToObject<T>();
+			//return RawBody.ToObject<T>();
+			return JsonConvert.DeserializeObject<T>(RawBody.ToString(), new SobjectConverter());
+			// return JsonConvert.DeserializeObject<T>(RawBody.ToString(), new SobjectCreationConverter());
 		}
 	}
 

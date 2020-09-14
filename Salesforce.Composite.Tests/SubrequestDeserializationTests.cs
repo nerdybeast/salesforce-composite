@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Salesforce.Composite.Tests.MockSobjects;
 using salesforce_composite;
 using salesforce_composite.ResponseModels;
+using salesforce_composite.serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,11 +16,13 @@ namespace Salesforce.Composite.Tests
     public class SubrequestDeserializationTests
     {
         private string _data;
+        private string _sobjectJson;
 
         [OneTimeSetUp]
         public void Setup()
         {
             _data = File.ReadAllText("./SampleData/CompositeResponse.json");
+            _sobjectJson = File.ReadAllText("./SampleData/Sobject.json");
         }
 
         [Test]
@@ -33,6 +36,13 @@ namespace Salesforce.Composite.Tests
 
             var newContactInfoResult = results.First(x => x.ReferenceId == "NewContactInfo");
             var newContactInfoModel = newContactInfoResult.Body<Contact>();
+        }
+
+        [Test]
+        public void DeserializeSobject()
+        {
+            var sobjectCreationConverter = new SobjectCreationConverter<Contact>();
+            Contact contact = JsonConvert.DeserializeObject<Contact>(_sobjectJson, sobjectCreationConverter);
         }
     }
 }

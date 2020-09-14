@@ -25,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SampleData\CompositeResponse.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="SampleData\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
